@@ -13,7 +13,7 @@ struct Randomizer {
     Randomizer(std::pair<int, int> intRange = {0, 500},
                std::pair<float, float> floatRange = {0, 1.f},
                std::pair<double, double> doubleRange = {0.0, 1.0})
-        : rng(std::random_device{}())
+        : rng(this->rd())
         , iDist(intRange.first, intRange.second)
         , fDist(floatRange.first, floatRange.second)
         , dDist(doubleRange.first, doubleRange.second)
@@ -45,27 +45,27 @@ struct Randomizer {
     }
 
     std::string
-    getString(unsigned length = 10)
+    getString(std::string::size_type length = 10)
     {
         static const char charset[] = "0123456789"
                                       "abcdefghijklmnopqrstuvwxyz"
                                       "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        static constexpr size_t maxCharsetIndex = sizeof(charset) - 1;
-        static std::uniform_int_distribution<> strIntDist(0, maxCharsetIndex);
-        static auto getCharacter = [=](std::default_random_engine &r) -> char {
-            return charset[strIntDist(r)];  //
-            // return 'a';  //
+        static std::uniform_int_distribution<> strIntDist(0,
+                                                          sizeof(charset) - 2);
+        static auto getCharacter = [=]() -> char {
+            return charset[strIntDist(this->rng)];
         };
 
-        std::string ret(length, 0);
-        std::generate_n(ret.begin(), length,
-                        std::bind(getCharacter, this->rng));
+        std::string ret;
+        ret.reserve(length);
+        std::generate_n(std::back_inserter(ret), length, getCharacter);
 
         return ret;
     }
 
 private:
-    std::default_random_engine rng;
+    std::random_device rd;
+    std::mt19937 rng;
 
     std::uniform_int_distribution<int> iDist;
     std::uniform_real_distribution<float> fDist;
