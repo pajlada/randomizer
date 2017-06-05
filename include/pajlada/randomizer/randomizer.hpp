@@ -44,6 +44,12 @@ struct Randomizer {
         return this->iDist(this->rng);
     }
 
+    unsigned int
+    getUInt()
+    {
+        return this->iDist(this->rng);
+    }
+
     std::string
     getString(std::string::size_type length = 10)
     {
